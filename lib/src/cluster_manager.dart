@@ -20,7 +20,7 @@ class ClusterManager<T extends ClusterItem> {
   ClusterManager(this._items, this.updateMarkers,
       {Future<Marker> Function(Cluster<T>)? markerBuilder,
       this.levels = const [
-        5.6,
+        5.5,
         6.75,
         7.0,
         8.25,
