@@ -37,21 +37,29 @@ class MaxDistClustering<T extends ClusterItem> {
       _cluster.add(Cluster.fromItems([entry1]));
     }
 
+    double maxDist = maxDistance;
+    int maxIterations = 100;
     bool changed = true;
-    while (changed) {
+
+    while (changed && maxIterations > 0) {
       changed = false;
       for (Cluster<T> c in _cluster) {
         _MinDistCluster<T>? minDistCluster = getClosestCluster(c, zoomLevel);
-        if (minDistCluster == null || minDistCluster.dist > maxDistance) {
+        if (minDistCluster == null || minDistCluster.dist > maxDist) {
           continue;
         }
         _cluster.add(Cluster.fromClusters(minDistCluster.cluster, c));
         _cluster.remove(c);
         _cluster.remove(minDistCluster.cluster);
         changed = true;
-
         break;
       }
+
+      if (progressive) {
+        maxDist *= 1.5;
+      }
+
+      maxIterations--;
     }
 
     return _cluster;
