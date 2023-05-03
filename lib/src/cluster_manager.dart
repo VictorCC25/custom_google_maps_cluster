@@ -19,7 +19,7 @@ class MaxDistParams {
 class ClusterManager<T extends ClusterItem> {
   ClusterManager(this._items, this.updateMarkers,
       {Future<Marker> Function(Cluster<T>)? markerBuilder,
-      this.levels = const [],
+      this.levels = const [5.5, 6.75, 8.25, 11.5, 14.5, 16.0, 16.5, 20.0],
       this.extraPercent = 0.8,
       this.extraZoom = 0.2,
       this.maxItemsForMaxDistAlgo = 350,
