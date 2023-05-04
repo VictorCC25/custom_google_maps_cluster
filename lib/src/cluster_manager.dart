@@ -11,9 +11,15 @@ import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platf
 enum ClusterAlgorithm { GEOHASH, MAX_DIST, GRID_BASED, KMEANS }
 
 class MaxDistParams {
-  final double epsilon;
+  final double maxDistance;
+  final int maxZoom;
+  final bool progressive;
 
-  MaxDistParams(this.epsilon);
+  MaxDistParams({
+    required this.maxDistance,
+    required this.maxZoom,
+    this.progressive = true,
+  });
 }
 
 class ClusterManager<T extends ClusterItem> {
@@ -36,7 +42,7 @@ class ClusterManager<T extends ClusterItem> {
       this.extraPercent = 0.8,
       this.extraZoom = 0.2,
       this.maxItemsForMaxDistAlgo = 350,
-      this.clusterAlgorithm = ClusterAlgorithm.GRID_BASED,
+      this.clusterAlgorithm = ClusterAlgorithm.GEOHASH,
       this.maxDistParams,
       this.stopClusteringZoom})
       : this.markerBuilder = markerBuilder ?? _basicMarkerBuilder,
@@ -203,8 +209,19 @@ class ClusterManager<T extends ClusterItem> {
 
   List<Cluster<T>> _computeClustersWithMaxDist(
       List<T> inputItems, double zoom) {
+    MaxDistParams? maxDistParams = this.maxDistParams;
+    if (maxDistParams == null) {
+      maxDistParams = MaxDistParams(
+        maxDistance: 100,
+        maxZoom: 15,
+        progressive: true,
+      );
+    }
+
     MaxDistClustering<T> scanner = MaxDistClustering(
-      epsilon: maxDistParams?.epsilon ?? 20,
+      maxDistance: maxDistParams.maxDistance,
+      maxZoom: maxDistParams.maxZoom,
+      progressive: maxDistParams.progressive,
     );
 
     return scanner.run(inputItems, _getZoomLevel(zoom));

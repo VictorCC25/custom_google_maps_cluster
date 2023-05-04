@@ -9,60 +9,80 @@ class _MinDistCluster<T extends ClusterItem> {
 }
 
 class MaxDistClustering<T extends ClusterItem> {
-  ///Complete list of points
+  /// Complete list of points
   late List<T> dataset;
 
   List<Cluster<T>> _cluster = [];
 
-  ///Threshold distance for two clusters to be considered as one cluster
-  final double epsilon;
-
+  /// Threshold distance for two clusters to be considered as one cluster
+  final double maxDistance;
+  final int maxZoom;
+  final bool progressive;
   final DistUtils distUtils = DistUtils();
 
   MaxDistClustering({
-    this.epsilon = 1,
+    required this.maxDistance,
+    required this.maxZoom,
+    this.progressive = true,
   });
 
-  ///Run clustering process, add configs in constructor
+  /// Run clustering process
   List<Cluster<T>> run(List<T> dataset, int zoomLevel) {
     this.dataset = dataset;
 
-    //initial variables
+    // Initial variables
     List<List<double>> distMatrix = [];
     for (T entry1 in dataset) {
       distMatrix.add([]);
       _cluster.add(Cluster.fromItems([entry1]));
     }
+
+    double maxDist = maxDistance;
+    int maxIterations = 100;
     bool changed = true;
-    while (changed) {
+
+    while (changed && maxIterations > 0) {
       changed = false;
       for (Cluster<T> c in _cluster) {
         _MinDistCluster<T>? minDistCluster = getClosestCluster(c, zoomLevel);
-        // print("mindistcluster ${minDistCluster?.dist}");
-        if (minDistCluster == null || minDistCluster.dist > epsilon) continue;
+        if (minDistCluster == null || minDistCluster.dist > maxDist) {
+          continue;
+        }
         _cluster.add(Cluster.fromClusters(minDistCluster.cluster, c));
         _cluster.remove(c);
         _cluster.remove(minDistCluster.cluster);
         changed = true;
-
         break;
       }
+
+      if (progressive) {
+        maxDist *= 1.5;
+      }
+
+      maxIterations--;
     }
+
     return _cluster;
   }
 
   _MinDistCluster<T>? getClosestCluster(Cluster cluster, int zoomLevel) {
     double minDist = 1000000000;
     Cluster<T> minDistCluster = Cluster.fromItems([]);
+
     for (Cluster<T> c in _cluster) {
       if (c.location == cluster.location) continue;
-      double tmp =
-          distUtils.getLatLonDist(c.location, cluster.location, zoomLevel);
+      double tmp = distUtils.getLatLonDist(
+        c.location,
+        cluster.location,
+        zoomLevel,
+      );
+
       if (tmp < minDist) {
         minDist = tmp;
         minDistCluster = Cluster<T>.fromItems(c.items);
       }
     }
+
     return _MinDistCluster(minDistCluster, minDist);
   }
 }
