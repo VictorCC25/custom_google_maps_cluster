@@ -135,8 +135,10 @@ class ClusterManager<T extends ClusterItem> {
     //     maxDistParams?.epsilon ?? 20 * pow(2, (zoom - 1).clamp(0, 28));
     double? newMaxDistance;
 
-    if (zoom <= 13.0) {
+    if (zoom >= 10.1 && zoom <= 13.0) {
       newMaxDistance = 8.0;
+    } else if (zoom >= 5.0 && zoom <= 10.0) {
+      newMaxDistance = 12.0;
     } else {
       newMaxDistance = 1;
     }
