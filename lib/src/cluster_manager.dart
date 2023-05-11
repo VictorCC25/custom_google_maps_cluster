@@ -143,7 +143,7 @@ class ClusterManager<T extends ClusterItem> {
       newMaxDistance = 14.0;
     } else if (zoom > 7.0 && zoom < 7.2) {
       newMaxDistance = 16.0;
-    } else if (zoom <= 7.0) {
+    } else if (zoom > 5.5 && zoom <= 7.0) {
       newMaxDistance = 18.0;
     } else {
       newMaxDistance = 8.0;
