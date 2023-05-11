@@ -63,7 +63,7 @@ class ClusterManager<T extends ClusterItem> {
   // Clusteringalgorithm
   final ClusterAlgorithm clusterAlgorithm;
 
-  final MaxDistParams? maxDistParams;
+  MaxDistParams? maxDistParams;
 
   /// Zoom level to stop cluster rendering
   final double? stopClusteringZoom;
@@ -120,6 +120,38 @@ class ClusterManager<T extends ClusterItem> {
   void onCameraMove(CameraPosition position, {forceUpdate = false}) {
     _zoom = position.zoom;
     if (forceUpdate) {
+      updateMap();
+    }
+  }
+
+  /// Update the maximum distance for clustering based on the current zoom level.
+  void updateMaxDistance() {
+    if (_mapId == null) return;
+    // Get the current zoom level.
+    double zoom = _zoom;
+
+    // Calculate the new maximum distance based on the current zoom level.
+    // double newMaxDistance =
+    //     maxDistParams?.epsilon ?? 20 * pow(2, (zoom - 1).clamp(0, 28));
+    double? newMaxDistance;
+
+    if (zoom >= 10.1 && zoom <= 13.0) {
+      newMaxDistance = 8.0;
+    } else if (zoom >= 7.6 && zoom <= 10.0) {
+      newMaxDistance = 12.0;
+    } else if (zoom >= 7.2 && zoom < 7.6) {
+      newMaxDistance = 14.0;
+    } else if (zoom > 7.0 && zoom < 7.2) {
+      newMaxDistance = 16.0;
+    } else if (zoom <= 7.0) {
+      newMaxDistance = 18.0;
+    } else {
+      newMaxDistance = 8.0;
+    }
+
+    // Update the maximum distance if it has changed.
+    if (maxDistParams?.epsilon != newMaxDistance) {
+      maxDistParams = MaxDistParams(newMaxDistance);
       updateMap();
     }
   }
